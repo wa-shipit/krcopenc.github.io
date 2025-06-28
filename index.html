@@ -1,0 +1,1049 @@
+    <!DOCTYPE html>
+    <html lang="ja">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>🎮 HTML練習サイト - ガチャゲーム 🎮</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: 'Arial', sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                color: white;
+            }
+
+            .header {
+                text-align: center;
+                padding: 20px;
+                background: rgba(0, 0, 0, 0.3);
+                backdrop-filter: blur(10px);
+                border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+            }
+
+            .header h1 {
+                font-size: 2.5em;
+                background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57);
+                background-size: 300% 300%;
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                animation: gradientShift 3s ease infinite;
+                text-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+            }
+
+            @keyframes gradientShift {
+                0%, 100% { background-position: 0% 50%; }
+                50% { background-position: 100% 50%; }
+            }
+
+            .container {
+                display: flex;
+                height: calc(100vh - 120px);
+                gap: 10px;
+                padding: 10px;
+                position: relative;
+            }
+
+            .editor-panel {
+                flex: 1;
+                background: rgba(0, 0, 0, 0.4);
+                border-radius: 15px;
+                padding: 20px;
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+                transform: translateX(-100%);
+                transition: transform 0.5s ease;
+                position: absolute;
+                left: 0;
+                top: 0;
+                height: 100%;
+                width: calc(50% - 5px);
+                z-index: 10;
+            }
+
+            .editor-panel.show {
+                transform: translateX(0);
+            }
+
+            .preview-panel {
+                flex: 1;
+                background: rgba(255, 255, 255, 0.95);
+                border-radius: 15px;
+                overflow: hidden;
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+                width: 100%;
+                transition: width 0.5s ease, margin-left 0.5s ease;
+                position: relative;
+            }
+
+            .preview-panel.with-editor {
+                width: calc(50% - 5px);
+                margin-left: calc(50% + 5px);
+            }
+
+            .editor-controls {
+                position: absolute;
+                top: 20px;
+                right: 20px;
+                z-index: 20;
+            }
+
+            .control-btn {
+                background: linear-gradient(45deg, #4ecdc4, #44a08d);
+                color: white;
+                border: none;
+                padding: 12px 20px;
+                border-radius: 25px;
+                cursor: pointer;
+                font-size: 14px;
+                margin-left: 10px;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 15px rgba(78, 205, 196, 0.4);
+            }
+
+            .control-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(78, 205, 196, 0.6);
+            }
+
+            .control-btn.hide {
+                display: none;
+            }
+
+            .panel-title {
+                font-size: 1.5em;
+                margin-bottom: 15px;
+                text-align: center;
+                color: #fff;
+                text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            }
+
+            #htmlEditor {
+                width: 100%;
+                height: calc(100% - 60px);
+                background: rgba(0, 0, 0, 0.6);
+                color: #00ff00;
+                border: 2px solid #00ff00;
+                border-radius: 10px;
+                padding: 15px;
+                font-family: 'Courier New', monospace;
+                font-size: 14px;
+                resize: none;
+                outline: none;
+                box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+            }
+
+            #htmlEditor:focus {
+                box-shadow: 0 0 30px rgba(0, 255, 0, 0.6);
+                border-color: #00ffff;
+            }
+
+            #preview {
+                width: 100%;
+                height: 100%;
+                border: none;
+                background: white;
+            }
+
+            .reset-btn {
+                background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 25px;
+                cursor: pointer;
+                font-size: 16px;
+                margin-top: 10px;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+            }
+
+            .reset-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(255, 107, 107, 0.6);
+            }
+
+            .editor-buttons {
+                display: flex;
+                gap: 10px;
+                margin-top: 10px;
+            }
+
+            .ai-btn {
+                background: linear-gradient(45deg, #9b59b6, #8e44ad);
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 25px;
+                cursor: pointer;
+                font-size: 16px;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 15px rgba(155, 89, 182, 0.4);
+            }
+
+            .ai-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(155, 89, 182, 0.6);
+            }
+
+            .ai-panel {
+                background: rgba(155, 89, 182, 0.2);
+                border: 2px solid #9b59b6;
+                border-radius: 15px;
+                padding: 20px;
+                margin-top: 15px;
+                transform: translateY(-20px);
+                opacity: 0;
+                visibility: hidden;
+                transition: all 0.5s ease;
+            }
+
+            .ai-panel.show {
+                transform: translateY(0);
+                opacity: 1;
+                visibility: visible;
+            }
+
+            .ai-panel h4 {
+                color: #9b59b6;
+                margin-bottom: 15px;
+                text-align: center;
+                font-size: 1.2em;
+            }
+
+            #aiInput {
+                width: 100%;
+                height: 80px;
+                background: rgba(0, 0, 0, 0.6);
+                color: #e74c3c;
+                border: 2px solid #9b59b6;
+                border-radius: 10px;
+                padding: 15px;
+                font-family: 'Arial', sans-serif;
+                font-size: 14px;
+                resize: none;
+                outline: none;
+                margin-bottom: 15px;
+            }
+
+            #aiInput:focus {
+                box-shadow: 0 0 20px rgba(155, 89, 182, 0.5);
+                border-color: #e74c3c;
+            }
+
+            .ai-send-btn {
+                background: linear-gradient(45deg, #e74c3c, #c0392b);
+                color: white;
+                border: none;
+                padding: 12px 25px;
+                border-radius: 25px;
+                cursor: pointer;
+                font-size: 16px;
+                width: 100%;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
+            }
+
+            .ai-send-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(231, 76, 60, 0.6);
+            }
+
+            .completion-message {
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 30px 50px;
+                border-radius: 20px;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+                backdrop-filter: blur(20px);
+                border: 2px solid rgba(255, 255, 255, 0.3);
+                z-index: 1000;
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.8);
+                transition: all 0.5s ease;
+                text-align: center;
+                font-size: 1.2em;
+                font-weight: bold;
+            }
+
+            .completion-message.show {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+
+            .completion-message::before {
+                content: '';
+                position: absolute;
+                top: -2px;
+                left: -2px;
+                right: -2px;
+                bottom: -2px;
+                background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57);
+                background-size: 300% 300%;
+                border-radius: 22px;
+                z-index: -1;
+                animation: gradientShift 3s ease infinite;
+            }
+
+            .completion-icon {
+                font-size: 3em;
+                margin-bottom: 15px;
+                animation: bounce 1s ease infinite;
+            }
+
+            @keyframes bounce {
+                0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+                40% { transform: translateY(-10px); }
+                60% { transform: translateY(-5px); }
+            }
+
+            .completion-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.7);
+                z-index: 999;
+                opacity: 0;
+                visibility: hidden;
+                transition: all 0.3s ease;
+            }
+
+            .completion-overlay.show {
+                opacity: 1;
+                visibility: visible;
+            }
+
+            @media (max-width: 768px) {
+                .container {
+                    flex-direction: column;
+                    height: auto;
+                }
+                
+                .editor-panel, .preview-panel {
+                    height: 50vh;
+                }
+
+                .completion-message {
+                    padding: 20px 30px;
+                    font-size: 1em;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <h1>🎮 HTML練習サイト - ガチャゲーム 🎮</h1>
+            <p>左側でHTMLを編集すると、右側にリアルタイムで反映されます！</p>
+        </div>
+
+        <div class="container">
+            <div class="editor-panel">
+                <h3 class="panel-title">📝 HTMLエディタ</h3>
+                <textarea id="htmlEditor" placeholder="ここにHTMLコードを入力してください..."><!DOCTYPE html>
+    <html lang="ja">
+    <head>
+        <meta charset="UTF-8">
+        <title>🎲 ガチャゲーム 🎲</title>
+    </head>
+    <body>
+        <div class="game-container">
+            <h1>🎲 ガチャゲーム 🎲</h1>
+            <p>ボタンを押してガチャを引こう！</p>
+            
+            <button class="gacha-btn" onclick="pullGacha()">✨ ガチャを引く！ ✨</button>
+            
+            <div id="result" class="result">ここに結果が表示されます</div>
+            
+            <div class="stats">
+                <div class="stat">
+                    <span class="stat-number" id="rCount">0</span>
+                    <div>R (レア)</div>
+                </div>
+                <div class="stat">
+                    <span class="stat-number" id="srCount">0</span>
+                    <div>SR (スーパーレア)</div>
+                </div>
+                <div class="stat">
+                    <span class="stat-number" id="ssrCount">0</span>
+                    <div>SSR (ウルトラレア)</div>
+                </div>
+            </div>
+            
+            <div class="history">
+                <h3>📜 ガチャ履歴</h3>
+                <div id="historyList">まだガチャを引いていません</div>
+            </div>
+            
+            <button class="reset-btn" onclick="resetStats()">🔄 リセット</button>
+        </div>
+
+        <script>
+            // ガチャアイテムのデータ
+            const items = {
+                r: ['🗡️ 鉄の剣', '🛡️ 木の盾', '👕 革の鎧', '🏹 木の弓', '💍 銅の指輪'],
+                sr: ['⚔️ 炎の剣', '🛡️ 氷の盾', '👘 魔法の鎧', '🏹 銀の弓', '💎 銀の指輪'],
+                ssr: ['🗡️ エクスカリバー', '🛡️ 聖なる盾', '👑 竜の鎧', '🏹 神弓アルテミス', '💍 賢者の指輪']
+            };
+            
+            // 確率設定（合計100%）
+            const rates = { r: 70, sr: 25, ssr: 5 };
+            
+            // 統計データ
+            let stats = { r: 0, sr: 0, ssr: 0 };
+            
+            function pullGacha() {
+                // ランダム数値生成（1-100）
+                const random = Math.floor(Math.random() * 100) + 1;
+                
+                // レア度判定
+                let rarity;
+                if (random <= rates.ssr) {
+                    rarity = 'ssr';
+                } else if (random <= rates.ssr + rates.sr) {
+                    rarity = 'sr';
+                } else {
+                    rarity = 'r';
+                }
+                
+                // アイテム選択
+                const itemList = items[rarity];
+                const item = itemList[Math.floor(Math.random() * itemList.length)];
+                
+                // 統計更新
+                stats[rarity]++;
+                updateStats();
+                
+                // 結果表示
+                showResult(rarity, item);
+                
+                // 履歴追加
+                addToHistory(rarity, item);
+            }
+            
+            function showResult(rarity, item) {
+                const resultDiv = document.getElementById('result');
+                resultDiv.className = 'result ' + rarity + '-result';
+                
+                if (rarity === 'ssr') {
+                    resultDiv.innerHTML = '🎉 ' + item + ' 🎉<br>おめでとう！超レア！';
+                } else if (rarity === 'sr') {
+                    resultDiv.innerHTML = '✨ ' + item + ' ✨<br>レアアイテム！';
+                } else {
+                    resultDiv.innerHTML = item + '<br>ノーマルアイテム';
+                }
+            }
+            
+            function updateStats() {
+                document.getElementById('rCount').textContent = stats.r;
+                document.getElementById('srCount').textContent = stats.sr;
+                document.getElementById('ssrCount').textContent = stats.ssr;
+            }
+            
+            function addToHistory(rarity, item) {
+                const historyList = document.getElementById('historyList');
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item ' + rarity + '-result';
+                historyItem.textContent = item;
+                
+                if (historyList.textContent === 'まだガチャを引いていません') {
+                    historyList.innerHTML = '';
+                }
+                
+                historyList.insertBefore(historyItem, historyList.firstChild);
+            }
+            
+            function resetStats() {
+                stats = { r: 0, sr: 0, ssr: 0 };
+                updateStats();
+                document.getElementById('result').innerHTML = 'ここに結果が表示されます';
+                document.getElementById('result').className = 'result';
+                document.getElementById('historyList').innerHTML = 'まだガチャを引いていません';
+            }
+        </script>
+    </body>
+    </html></textarea>
+                <div class="editor-buttons">
+                    <button class="reset-btn" onclick="resetToDefault()">🔄 初期状態に戻す</button>
+                    <button class="ai-btn" onclick="toggleAIPanel()">🤖 AIに指示をする</button>
+                </div>
+                
+                <div class="ai-panel" id="aiPanel">
+                    <h4>🤖 AIアシスタント</h4>
+                    <textarea id="aiInput" placeholder="AIに指示を入力してください...（例：10連ガチャ機能を追加して）"></textarea>
+                    <button class="ai-send-btn" onclick="sendAIRequest()">✨ 送信</button>
+                </div>
+            </div>
+
+            <div class="preview-panel">
+                <div class="editor-controls">
+                    <button class="control-btn" id="showEditorBtn" onclick="showEditor()">📝 エディタを表示</button>
+                    <button class="control-btn hide" id="hideEditorBtn" onclick="hideEditor()">❌ エディタを隠す</button>
+                </div>
+                <iframe id="preview" srcdoc="<!DOCTYPE html>
+    <html lang='ja'>
+    <head>
+        <meta charset='UTF-8'>
+        <title>🎲 ガチャゲーム 🎲</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                text-align: center;
+                padding: 20px;
+                min-height: 100vh;
+            }
+            .game-container {
+                max-width: 600px;
+                margin: 0 auto;
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 20px;
+                padding: 30px;
+                backdrop-filter: blur(10px);
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            }
+            h1 {
+                font-size: 3em;
+                margin-bottom: 20px;
+                text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+                animation: glow 2s ease-in-out infinite alternate;
+            }
+            @keyframes glow {
+                from { text-shadow: 0 0 20px rgba(255, 255, 255, 0.8); }
+                to { text-shadow: 0 0 30px rgba(255, 255, 255, 1), 0 0 40px rgba(255, 255, 255, 0.8); }
+            }
+            .gacha-btn {
+                background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+                color: white;
+                border: none;
+                padding: 20px 40px;
+                font-size: 24px;
+                border-radius: 50px;
+                cursor: pointer;
+                margin: 20px;
+                transition: all 0.3s ease;
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+                position: relative;
+                z-index: 1;
+                pointer-events: auto;
+                user-select: none;
+                display: inline-block;
+            }
+            .gacha-btn:hover {
+                transform: translateY(-5px) scale(1.05);
+                box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            }
+            .gacha-btn:active {
+                transform: translateY(-2px) scale(1.02);
+            }
+            .gacha-btn * {
+                pointer-events: none;
+            }
+            .result {
+                margin: 30px 0;
+                padding: 20px;
+                border-radius: 15px;
+                font-size: 24px;
+                font-weight: bold;
+                min-height: 80px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.5s ease;
+            }
+            .r-result {
+                background: linear-gradient(45deg, #95a5a6, #bdc3c7);
+                color: #2c3e50;
+                box-shadow: 0 4px 15px rgba(149, 165, 166, 0.4);
+            }
+            .sr-result {
+                background: linear-gradient(45deg, #3498db, #2980b9);
+                color: white;
+                box-shadow: 0 4px 15px rgba(52, 152, 219, 0.6);
+                animation: pulse 1s ease-in-out;
+            }
+            .ssr-result {
+                background: linear-gradient(45deg, #f1c40f, #f39c12);
+                color: #8b4513;
+                box-shadow: 0 4px 15px rgba(241, 196, 15, 0.8);
+                animation: rainbow 2s ease-in-out infinite, pulse 1s ease-in-out;
+            }
+            @keyframes pulse {
+                0%, 100% { transform: scale(1); }
+                50% { transform: scale(1.05); }
+            }
+            @keyframes rainbow {
+                0%, 100% { box-shadow: 0 4px 15px rgba(241, 196, 15, 0.8); }
+                25% { box-shadow: 0 4px 15px rgba(231, 76, 60, 0.8); }
+                50% { box-shadow: 0 4px 15px rgba(155, 89, 182, 0.8); }
+                75% { box-shadow: 0 4px 15px rgba(52, 152, 219, 0.8); }
+            }
+            .stats {
+                display: flex;
+                justify-content: space-around;
+                margin: 20px 0;
+                flex-wrap: wrap;
+            }
+            .stat {
+                background: rgba(255, 255, 255, 0.2);
+                padding: 15px;
+                border-radius: 10px;
+                margin: 5px;
+                min-width: 100px;
+            }
+            .stat-number {
+                font-size: 2em;
+                font-weight: bold;
+                display: block;
+            }
+            .history {
+                background: rgba(0, 0, 0, 0.3);
+                border-radius: 15px;
+                padding: 20px;
+                margin-top: 20px;
+                max-height: 200px;
+                overflow-y: auto;
+            }
+            .history-item {
+                padding: 10px;
+                margin: 5px 0;
+                border-radius: 8px;
+                animation: slideIn 0.5s ease-out;
+            }
+            @keyframes slideIn {
+                from { opacity: 0; transform: translateX(-20px); }
+                to { opacity: 1; transform: translateX(0); }
+            }
+            .reset-btn {
+                background: linear-gradient(45deg, #e74c3c, #c0392b);
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 25px;
+                cursor: pointer;
+                margin-top: 20px;
+                transition: all 0.3s ease;
+            }
+            .reset-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
+            }
+        </style>
+    </head>
+    <body>
+        <div class='game-container'>
+            <h1>🎲 ガチャゲーム 🎲</h1>
+            <p>ボタンを押してガチャを引こう！</p>
+            
+            <button class='gacha-btn' onclick='pullGacha()'>✨ ガチャを引く！ ✨</button>
+            
+            <div id='result' class='result'>ここに結果が表示されます</div>
+            
+            <div class='stats'>
+                <div class='stat'>
+                    <span class='stat-number' id='rCount'>0</span>
+                    <div>R (レア)</div>
+                </div>
+                <div class='stat'>
+                    <span class='stat-number' id='srCount'>0</span>
+                    <div>SR (スーパーレア)</div>
+                </div>
+                <div class='stat'>
+                    <span class='stat-number' id='ssrCount'>0</span>
+                    <div>SSR (ウルトラレア)</div>
+                </div>
+            </div>
+            
+            <div class='history'>
+                <h3>📜 ガチャ履歴</h3>
+                <div id='historyList'>まだガチャを引いていません</div>
+            </div>
+            
+            <button class='reset-btn' onclick='resetStats()'>🔄 リセット</button>
+        </div>
+
+        <script>
+            const items = {
+                r: ['🗡️ 鉄の剣', '🛡️ 木の盾', '👕 革の鎧', '🏹 木の弓', '💍 銅の指輪'],
+                sr: ['⚔️ 炎の剣', '🛡️ 氷の盾', '👘 魔法の鎧', '🏹 銀の弓', '💎 銀の指輪'],
+                ssr: ['🗡️ エクスカリバー', '🛡️ 聖なる盾', '👑 竜の鎧', '🏹 神弓アルテミス', '💍 賢者の指輪']
+            };
+            const rates = { r: 70, sr: 25, ssr: 5 };
+            let stats = { r: 0, sr: 0, ssr: 0 };
+            
+            function pullGacha() {
+                const random = Math.floor(Math.random() * 100) + 1;
+                let rarity;
+                if (random <= rates.ssr) {
+                    rarity = 'ssr';
+                } else if (random <= rates.ssr + rates.sr) {
+                    rarity = 'sr';
+                } else {
+                    rarity = 'r';
+                }
+                const itemList = items[rarity];
+                const item = itemList[Math.floor(Math.random() * itemList.length)];
+                stats[rarity]++;
+                updateStats();
+                showResult(rarity, item);
+                addToHistory(rarity, item);
+            }
+            
+            function showResult(rarity, item) {
+                const resultDiv = document.getElementById('result');
+                resultDiv.className = 'result ' + rarity + '-result';
+                if (rarity === 'ssr') {
+                    resultDiv.innerHTML = '🎉 ' + item + ' 🎉<br>おめでとう！超レア！';
+                } else if (rarity === 'sr') {
+                    resultDiv.innerHTML = '✨ ' + item + ' ✨<br>レアアイテム！';
+                } else {
+                    resultDiv.innerHTML = item + '<br>ノーマルアイテム';
+                }
+            }
+            
+            function updateStats() {
+                document.getElementById('rCount').textContent = stats.r;
+                document.getElementById('srCount').textContent = stats.sr;
+                document.getElementById('ssrCount').textContent = stats.ssr;
+            }
+            
+            function addToHistory(rarity, item) {
+                const historyList = document.getElementById('historyList');
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item ' + rarity + '-result';
+                historyItem.textContent = item;
+                if (historyList.textContent === 'まだガチャを引いていません') {
+                    historyList.innerHTML = '';
+                }
+                historyList.insertBefore(historyItem, historyList.firstChild);
+            }
+            
+            function resetStats() {
+                stats = { r: 0, sr: 0, ssr: 0 };
+                updateStats();
+                document.getElementById('result').innerHTML = 'ここに結果が表示されます';
+                document.getElementById('result').className = 'result';
+                document.getElementById('historyList').innerHTML = 'まだガチャを引いていません';
+            }
+        </script>
+    </body>
+    </html>"></iframe>
+            </div>
+        </div>
+
+        <!-- 完了メッセージ -->
+        <div class="completion-overlay" id="completionOverlay"></div>
+        <div class="completion-message" id="completionMessage">
+            <div class="completion-icon">✨</div>
+            <div>指示を完了しました。<br>画面を確認してください</div>
+        </div>
+
+        <script>
+            const editor = document.getElementById('htmlEditor');
+            const preview = document.getElementById('preview');
+
+            // リアルタイム更新機能
+            function updatePreview() {
+                const htmlContent = editor.value;
+                // CSSを自動で追加してプレビューに反映
+                const styledHTML = htmlContent.replace(
+                    '</head>',
+                    `<style>
+                        body {
+                            font-family: Arial, sans-serif;
+                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                            color: white;
+                            text-align: center;
+                            padding: 20px;
+                            min-height: 100vh;
+                        }
+                        .game-container {
+                            max-width: 600px;
+                            margin: 0 auto;
+                            background: rgba(255, 255, 255, 0.1);
+                            border-radius: 20px;
+                            padding: 30px;
+                            backdrop-filter: blur(10px);
+                            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+                        }
+                        h1 {
+                            font-size: 3em;
+                            margin-bottom: 20px;
+                            text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+                            animation: glow 2s ease-in-out infinite alternate;
+                        }
+                        @keyframes glow {
+                            from { text-shadow: 0 0 20px rgba(255, 255, 255, 0.8); }
+                            to { text-shadow: 0 0 30px rgba(255, 255, 255, 1), 0 0 40px rgba(255, 255, 255, 0.8); }
+                        }
+                        .gacha-btn {
+                            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+                            color: white;
+                            border: none;
+                            padding: 20px 40px;
+                            font-size: 24px;
+                            border-radius: 50px;
+                            cursor: pointer;
+                            margin: 20px;
+                            transition: all 0.3s ease;
+                            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+                            position: relative;
+                            z-index: 1;
+                            pointer-events: auto;
+                            user-select: none;
+                            display: inline-block;
+                        }
+                        .gacha-btn:hover {
+                            transform: translateY(-5px) scale(1.05);
+                            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+                        }
+                        .gacha-btn:active {
+                            transform: translateY(-2px) scale(1.02);
+                        }
+                        .gacha-btn * {
+                            pointer-events: none;
+                        }
+                        .result {
+                            margin: 30px 0;
+                            padding: 20px;
+                            border-radius: 15px;
+                            font-size: 24px;
+                            font-weight: bold;
+                            min-height: 80px;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            transition: all 0.5s ease;
+                        }
+                        .r-result {
+                            background: linear-gradient(45deg, #95a5a6, #bdc3c7);
+                            color: #2c3e50;
+                            box-shadow: 0 4px 15px rgba(149, 165, 166, 0.4);
+                        }
+                        .sr-result {
+                            background: linear-gradient(45deg, #3498db, #2980b9);
+                            color: white;
+                            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.6);
+                            animation: pulse 1s ease-in-out;
+                        }
+                        .ssr-result {
+                            background: linear-gradient(45deg, #f1c40f, #f39c12);
+                            color: #8b4513;
+                            box-shadow: 0 4px 15px rgba(241, 196, 15, 0.8);
+                            animation: rainbow 2s ease-in-out infinite, pulse 1s ease-in-out;
+                        }
+                        @keyframes pulse {
+                            0%, 100% { transform: scale(1); }
+                            50% { transform: scale(1.05); }
+                        }
+                        @keyframes rainbow {
+                            0%, 100% { box-shadow: 0 4px 15px rgba(241, 196, 15, 0.8); }
+                            25% { box-shadow: 0 4px 15px rgba(231, 76, 60, 0.8); }
+                            50% { box-shadow: 0 4px 15px rgba(155, 89, 182, 0.8); }
+                            75% { box-shadow: 0 4px 15px rgba(52, 152, 219, 0.8); }
+                        }
+                        .stats {
+                            display: flex;
+                            justify-content: space-around;
+                            margin: 20px 0;
+                            flex-wrap: wrap;
+                        }
+                        .stat {
+                            background: rgba(255, 255, 255, 0.2);
+                            padding: 15px;
+                            border-radius: 10px;
+                            margin: 5px;
+                            min-width: 100px;
+                        }
+                        .stat-number {
+                            font-size: 2em;
+                            font-weight: bold;
+                            display: block;
+                        }
+                        .history {
+                            background: rgba(0, 0, 0, 0.3);
+                            border-radius: 15px;
+                            padding: 20px;
+                            margin-top: 20px;
+                            max-height: 200px;
+                            overflow-y: auto;
+                        }
+                        .history-item {
+                            padding: 10px;
+                            margin: 5px 0;
+                            border-radius: 8px;
+                            animation: slideIn 0.5s ease-out;
+                        }
+                        @keyframes slideIn {
+                            from { opacity: 0; transform: translateX(-20px); }
+                            to { opacity: 1; transform: translateX(0); }
+                        }
+                        .reset-btn {
+                            background: linear-gradient(45deg, #e74c3c, #c0392b);
+                            color: white;
+                            border: none;
+                            padding: 10px 20px;
+                            border-radius: 25px;
+                            cursor: pointer;
+                            margin-top: 20px;
+                            transition: all 0.3s ease;
+                        }
+                        .reset-btn:hover {
+                            transform: translateY(-2px);
+                            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
+                        }
+                    </style>
+                    </head>`
+                );
+                preview.srcdoc = styledHTML;
+            }
+
+            // 初期HTMLを保存
+            const defaultHTML = editor.value;
+            editor.setAttribute('data-default', defaultHTML);
+
+            // 初期表示
+            window.addEventListener('load', function() {
+                updatePreview();
+            });
+            
+            document.addEventListener('DOMContentLoaded', function() {
+                updatePreview();
+            });
+            
+            updatePreview();
+
+            // エディタの内容が変更されたときにプレビューを更新
+            editor.addEventListener('input', updatePreview);
+
+            // 初期状態に戻す機能
+            function resetToDefault() {
+                editor.value = editor.getAttribute('data-default');
+                updatePreview();
+            }
+
+            // エディタ表示/非表示制御
+            const editorPanel = document.querySelector('.editor-panel');
+            const previewPanel = document.querySelector('.preview-panel');
+            const showEditorBtn = document.getElementById('showEditorBtn');
+            const hideEditorBtn = document.getElementById('hideEditorBtn');
+
+            function showEditor() {
+                editorPanel.classList.add('show');
+                previewPanel.classList.add('with-editor');
+                showEditorBtn.classList.add('hide');
+                hideEditorBtn.classList.remove('hide');
+            }
+
+            function hideEditor() {
+                editorPanel.classList.remove('show');
+                previewPanel.classList.remove('with-editor');
+                showEditorBtn.classList.remove('hide');
+                hideEditorBtn.classList.add('hide');
+            }
+
+            // AI機能
+            const aiPanel = document.getElementById('aiPanel');
+            const aiInput = document.getElementById('aiInput');
+
+            function toggleAIPanel() {
+                aiPanel.classList.toggle('show');
+            }
+
+            function sendAIRequest() {
+                const userInput = aiInput.value.trim();
+                if (!userInput) return;
+
+                const sendBtn = document.querySelector('.ai-send-btn');
+                const originalText = sendBtn.textContent;
+                sendBtn.textContent = '🤖 AIが処理中...';
+                sendBtn.disabled = true;
+
+                setTimeout(() => {
+                    add10PullGachaFeature();
+                    
+                    sendBtn.textContent = '✅ 完了！';
+                    setTimeout(() => {
+                        sendBtn.textContent = originalText;
+                        sendBtn.disabled = false;
+                        aiInput.value = '';
+                        aiPanel.classList.remove('show');
+                    }, 1500);
+                }, 2000);
+            }
+
+            function add10PullGachaFeature() {
+                const buttonToAdd = '\n        <button class="gacha-btn" onclick="pull10Gacha()" style="background: linear-gradient(45deg, #f39c12, #e67e22);">🎊 10連ガチャ！ 🎊</button>';
+                const functionToAdd = '\n        function pull10Gacha() {\n            let count = 0;\n            const interval = setInterval(() => {\n                pullGacha();\n                count++;\n                if (count >= 10) {\n                    clearInterval(interval);\n                    setTimeout(() => {\n                        const resultDiv = document.getElementById("result");\n                        resultDiv.innerHTML = "🎉 10連ガチャ完了！ 🎉<br>結果を確認してください！";\n                        resultDiv.className = "result ssr-result";\n                    }, 500);\n                }\n            }, 300);\n        }\n        \n        ';
+
+                animateCodeInsertion(buttonToAdd, functionToAdd);
+            }
+
+            function animateCodeInsertion(buttonCode, functionCode) {
+                editor.style.boxShadow = '0 0 50px rgba(241, 196, 15, 0.8)';
+                const originalCode = editor.value;
+                const buttonInsertPos = originalCode.indexOf('<button class="gacha-btn" onclick="pullGacha()">✨ ガチャを引く！ ✨</button>') + '<button class="gacha-btn" onclick="pullGacha()">✨ ガチャを引く！ ✨</button>'.length;
+                
+                setTimeout(() => {
+                    typeText(originalCode.slice(0, buttonInsertPos), buttonCode, 0, () => {
+                        const intermediateCode = originalCode.slice(0, buttonInsertPos) + buttonCode + originalCode.slice(buttonInsertPos);
+                        const newFunctionInsertPos = intermediateCode.indexOf('function resetStats() {');
+                        setTimeout(() => {
+                            typeText(intermediateCode.slice(0, newFunctionInsertPos), functionCode, 0, () => {
+                                const finalCode = intermediateCode.slice(0, newFunctionInsertPos) + functionCode + intermediateCode.slice(newFunctionInsertPos);
+                                editor.value = finalCode;
+                                updatePreview();
+                                setTimeout(() => {
+                                    editor.style.boxShadow = '0 0 20px rgba(0, 255, 0, 0.3)';
+                                    showCompletionMessage();
+                                }, 500);
+                            });
+                        }, 200);
+                    });
+                }, 200);
+            }
+
+            function typeText(baseText, textToAdd, index, callback) {
+                if (index <= textToAdd.length) {
+                    const currentText = baseText + textToAdd.slice(0, index);
+                    const remainingOriginal = editor.value.slice(baseText.length + textToAdd.length);
+                    editor.value = currentText + remainingOriginal;
+                    editor.scrollTop = editor.scrollHeight;
+                    setTimeout(() => {
+                        typeText(baseText, textToAdd, index + 1, callback);
+                    }, Math.random() * 15 + 10);
+                } else {
+                    if (callback) callback();
+                }
+            }
+
+            function showCompletionMessage() {
+                const overlay = document.getElementById('completionOverlay');
+                const message = document.getElementById('completionMessage');
+                overlay.classList.add('show');
+                message.classList.add('show');
+                setTimeout(() => {
+                    overlay.classList.remove('show');
+                    message.classList.remove('show');
+                }, 3000);
+                overlay.addEventListener('click', () => {
+                    overlay.classList.remove('show');
+                    message.classList.remove('show');
+                });
+            }
+        </script>
+    </body>
+    </html>
